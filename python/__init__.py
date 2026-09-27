@@ -12,13 +12,19 @@ _netgen_bin_dir=os.path.realpath(os.path.join(os.path.dirname(__file__),'..',con
 _netgen_lib_dir=os.path.realpath(os.path.join(os.path.dirname(__file__),'..',config.NETGEN_PYTHON_RPATH))
 
 def load_occ_libs():
+    if not config.is_python_package:
+        return
     try:
         try:
             import importlib.metadata as metadata
         except ImportError:
             import importlib_metadata as metadata
         import ctypes
-        metadata.metadata('netgen-occt')
+        occt_version = metadata.version('netgen-occt')
+        if occt_version != config.OCC_VERSION:
+            print(f"Warning: netgen was built with OpenCascade {config.OCC_VERSION}, "
+                  f"installed netgen-occt is {occt_version}, not loading it", file=sys.stderr)
+            return
         lib_names = [
             "TKOffset",
             "TKFillet",
